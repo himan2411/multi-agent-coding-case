@@ -29,11 +29,8 @@ echo "with a worker brief: $(printf '%s\n' "$briefed" | grep -c .)"
 echo "successor workers (-rN): $(grep -E -- '-r[0-9]+$' <<<"$ids" | grep -vcE -- '-review-r[0-9]+$' || true)"
 
 echo "== Independent review rounds"
-# Rounds are named <task>-review-<n> or <task>-review-r<n>, and round 1 is
-# often an unnumbered <task>-review, counted only beside numbered rounds.
-# A lone unnumbered folder may be a clean first-round pass or a one-off review
-# of someone else's PR; names cannot tell them apart, so only changes with
-# 2 or more rounds are reported.
+# Rounds are <task>-review-<n> or -review-r<n>; an unnumbered <task>-review
+# counts as round 1 only beside numbered rounds. NUMBERS.md explains why.
 numbered=$(grep -E -- '-review-r?[0-9]+$' <<<"$ids" | sed -E 's/-review-r?[0-9]+$//' || true)
 first=$(grep -E -- '-review$' <<<"$ids" | sed -E 's/-review$//' | grep -Fx -f <(sort -u <<<"$numbered") || true)
 rounds=$(printf '%s\n%s\n' "$numbered" "$first" | grep . | sort | uniq -c || true)

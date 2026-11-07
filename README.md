@@ -14,7 +14,7 @@ The orchestrator is [Firstmate](https://github.com/kunchenguid/firstmate), an op
 ## Results so far
 
 - 471 briefed worker tasks between August and November 2026, mostly on client data-science projects.
-- 28 changes needed 2 to 5 rounds of independent review, 83 reviewer runs in all. Changes that passed on the first round are not counted, because their folder names look the same as one-off reviews of other people's PRs.
+- About 28 changes needed 2 to 5 rounds of independent review, about 83 reviewer runs in all. Changes that passed on the first round are not counted, because their folder names look the same as one-off reviews of other people's PRs.
 - The two counts above are from one dated snapshot in [NUMBERS.md](NUMBERS.md).
 - Over 47 days, 66% of the supervisor's turns changed nothing. That finding drove the largest set of fixes. I have not re-measured since.
 

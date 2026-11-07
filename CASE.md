@@ -107,10 +107,10 @@ A change has to pass all of these before it lands. Most are enforced by a script
 | Pipeline (`no-mistakes` mode) | Automated review, tests, lint, docs, push, PR and CI | The `no-mistakes` tool |
 | PR merge | PR is open, not a draft, mergeable, every check green at the current head, every required check has reported; the merge is bound to that head | `fm-pr-merge.sh` (live reads, then `gh pr merge --match-head-commit`) |
 | Local merge (`local-only` mode) | Fast-forward only onto local `main` | `fm-merge-local.sh` |
-| My approval | I approve every merge, except on the 2 projects where I turned on auto-merge for green, in-scope work | Process rule: Firstmate asks me. The red-PR refusal is in `fm-pr-merge.sh` and holds even with auto-merge on, unless I waive a named check |
+| My approval | I approve every merge, except on the projects where I turned on auto-merge for green, in-scope work | Process rule: Firstmate asks me. The red-PR refusal is in `fm-pr-merge.sh` and holds even with auto-merge on, unless I waive a named check |
 | Teardown | Worktree clean and its work landed | Script: `fm-teardown.sh` refuses otherwise, unless explicitly forced |
 
-How I set the delivery modes across my registered projects: most run the full pipeline for product code and a lighter direct PR for internal tooling (`no-mistakes-prod-only`). Personal repos and experiments are `local-only`, where the worker hands back a ready branch instead of opening a PR. Two always run the full pipeline. Current counts are in [NUMBERS.md](NUMBERS.md).
+How I set the delivery modes across my registered projects: most run the full pipeline for product code and a lighter direct PR for internal tooling (`no-mistakes-prod-only`). Personal repos and experiments are `local-only`, where the worker hands back a ready branch instead of opening a PR. A few always run the full pipeline. Current counts are in [NUMBERS.md](NUMBERS.md).
 
 ## What I changed locally
 
