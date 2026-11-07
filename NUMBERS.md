@@ -4,7 +4,7 @@ Two sources. The first you can rerun against any Firstmate home with `scripts/co
 
 ## 1. Counts from the Firstmate home
 
-Run on 7 Nov 2026 against my live home, with `scripts/counts.sh ~/Work/firstmate`. The script prints aggregates only, so client task names never leave the machine. The fleet was running while I measured, so a rerun a day later gives slightly larger task counts.
+Run on 7 Nov 2026 at 16:28 against my live home, with `scripts/counts.sh ~/Work/firstmate`. The script prints aggregates only, so client task names never leave the machine. The fleet was running while I measured, so a rerun later gives larger task counts. The other files quote this snapshot; this file is the one to update.
 
 ```text
 == Local commits on top of origin/main
@@ -16,9 +16,9 @@ type feat: 1
 type fix: 33
 type test: 8
 == Tasks
-task directories: 467
-with a worker brief: 457
-successor workers (-rN): 25
+task directories: 473
+with a worker brief: 463
+successor workers (-rN): 27
 == Independent review rounds (<task>-review-N)
 changes reviewed: 38
 reviewer workers: 70
@@ -37,11 +37,13 @@ Firstmate's own changes:
   fm-wake-noise: 4
 == Backlog records (unique task ids by kind)
 kind decision-hold: 204
-kind scout: 169
-kind ship: 103
+kind scout: 174
+kind ship: 104
 kind task: 2
+ids with no kind: 121
 == Registered projects by delivery mode
-mode local-only: 10
+projects: 42
+mode local-only: 11
 mode no-mistakes: 2
 mode no-mistakes-prod-only: 29
 auto-merge (+yolo): 2
@@ -53,8 +55,8 @@ What each line means, and its limits:
 - **Task directories** are folders under `data/` and `data/archive/`. Firstmate makes one per task for its brief, report and proof files. **With a worker brief** counts the ones where a worker was actually briefed. The folders without a brief hold notes, backups or shared records, not workers.
 - **Successor workers** are tasks named `<task>-r2`, `-r3` and so on. Each one replaced a worker that was lost, stopped, or sent back to redo the work. The name does not record which.
 - **Review rounds** come from folders named `<task>-review-<n>`. Each is one fresh reviewer worker. One change is missing the folder for one of its rounds (`fm-upgrade` shows 3 folders but had 4 rounds), so these counts are a lower bound. Reviews of a PR that used other naming are not counted.
-- **Backlog records** count unique task ids in Firstmate's backlog files by their recorded kind. A decision hold is a question parked for me to answer, not a worker. 91 entries carry no kind and are left out.
-- **Delivery modes** are the first mode of each project in the registry.
+- **Backlog records** count unique task ids in Firstmate's backlog files by their recorded kind. A decision hold is a question parked for me to answer, not a worker. **Ids with no kind** are older entries that never recorded one; they are left out of the kinds above.
+- **Delivery modes** are the first mode of each project in the registry. `local-only` is a delivery mode: the worker hands back a ready branch instead of opening a PR.
 
 ## 2. Where the supervisor's time went (6 Aug to 21 Sep)
 

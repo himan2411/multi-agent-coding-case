@@ -13,20 +13,21 @@ The orchestrator is [Firstmate](https://github.com/kunchenguid/firstmate), an op
 
 ## Results so far
 
-- 457 briefed worker tasks between August and November 2026, mostly on client data-science projects.
+- 463 briefed worker tasks between August and November 2026, mostly on client data-science projects.
 - 38 changes went through the independent review loop, using 70 reviewer workers. 24 passed the first round, 14 needed 2 to 5 rounds.
+- All counts are from one dated snapshot in [NUMBERS.md](NUMBERS.md).
 - Over 47 days, 66% of the supervisor's turns changed nothing. That finding drove the largest set of fixes. I have not re-measured since.
 
 ## Run it
 
-The counts need bash, git and awk. No other dependencies.
+The scripts need bash (3.2 or later), git and the standard Unix tools that ship with macOS and Linux.
 
 ```sh
 scripts/counts-check.sh              # self-check on a synthetic home, no setup needed
 scripts/counts.sh ~/path/to/firstmate   # recount from a real Firstmate home
 ```
 
-The self-check builds a small synthetic home in a temp folder and fails if any count is wrong. Everything else in this repo is Markdown; the diagrams are Mermaid and render on GitHub.
+The self-check builds a small synthetic home in a temp folder. It fails if any count is wrong or if a task name shows up in the output. Everything else in this repo is Markdown; the diagrams are Mermaid and render on GitHub.
 
 ## What is not here
 

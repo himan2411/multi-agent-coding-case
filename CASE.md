@@ -7,27 +7,24 @@ The work it runs is mostly client data-science projects, plus Firstmate itself a
 ## The pieces
 
 ```mermaid
-flowchart LR
+flowchart BT
     me(["Me, in one chat"])
     fm["Firstmate<br/>one Claude Code session"]
     watch["Watcher<br/>bash loop, no model tokens"]
     disk[("Files on disk<br/>status logs, inboxes,<br/>briefs, reports, backlog")]
 
-    subgraph crew["tmux: one window per worker"]
-        direction TB
+    subgraph crew["tmux: one window per worker, each in its own git worktree"]
+        direction LR
         w1["Ship worker<br/>writes the change"]
-        w2["Scout worker<br/>writes a report, no code"]
-        w3["Reviewer<br/>fresh scout per round"]
+        w2["Scout worker<br/>writes a report"]
+        w3["Reviewer<br/>fresh each round"]
     end
-
-    wt["Disposable git worktrees<br/>one per worker"]
 
     me <-->|"requests, decisions,<br/>merge approvals"| fm
     fm -->|"brief, spawn,<br/>steering messages"| crew
     crew -->|"one status line<br/>per state change"| disk
     disk -->|"read"| watch
     watch -->|"wake only when<br/>action is needed"| fm
-    crew --- wt
 ```
 
 - **Firstmate** is the only agent I talk to. It decides what kind of task a request is, writes a brief, spawns a worker, and tells me outcomes. It does not edit project code itself.
@@ -73,7 +70,7 @@ sequenceDiagram
 4. **Work.** The worker reproduces the problem first, fixes it, and runs the repo's own lint and tests. It writes scratch and proof outside the worktree.
 5. **Review loop.** Described below. This is the part I added on top of Firstmate.
 6. **Deliver and merge.** Described under the gates.
-7. **Teardown.** Teardown refuses a dirty worktree and refuses to return one whose committed work has not landed.
+7. **Teardown.** Teardown refuses a dirty worktree and refuses to return one whose committed work has not landed, unless I explicitly force it to discard that work.
 
 ## The review loop
 
@@ -96,31 +93,31 @@ The rules, and why each exists:
 - **The reviewer runs the code.** It runs the tests, breaks each new test on purpose to prove it can fail (a mutation check), and sweeps every sibling of any flaw it finds. "Looks good" without a list of what it ran does not end the loop.
 - **Review happens before any human or bot reviewer sees the PR**, because each extra round there costs a person's time.
 
-38 changes went through this loop, using 70 reviewer workers. 24 passed on the first round. 14 needed between 2 and 5 rounds.
+How many changes went through this loop, and how many rounds each took, is in [NUMBERS.md](NUMBERS.md).
 
 ## The gates
 
-A change has to pass all of these before it lands. Each one is enforced by a script, not by the agent's judgment.
+A change has to pass all of these before it lands. Most are enforced by a script. Two are process rules the agents follow: the independent review loop and asking for my approval.
 
 | Gate | What it checks | Enforced by |
 |---|---|---|
-| Isolation | Worker is in its own worktree, not the main checkout | Brief's first step; `fm-spawn.sh` refuses a non-isolated worktree |
+| Isolation | Worker is in its own worktree, not the main checkout | Script: `fm-spawn.sh` refuses a non-isolated worktree. The brief also tells the worker to check before branching |
 | Delivery mode | Brief and spawn agree on `local-only`, `direct-PR` or `no-mistakes` | `fm-spawn.sh` refuses a mismatch |
 | Done | The commit the worker names is on the shared branch, not only in its disposable copy | `fm-dod-lib.sh` reachability check |
-| Independent review | A fresh reviewer found nothing | The review loop above |
+| Independent review | A fresh reviewer found nothing | Process rule: the review-loop skill that Firstmate and the workers follow |
 | Pipeline (`no-mistakes` mode) | Automated review, tests, lint, docs, push, PR and CI | The `no-mistakes` tool |
 | PR merge | PR is open, not a draft, mergeable, every check green at the current head, every required check has reported; the merge is bound to that head | `fm-pr-merge.sh` (live reads, then `gh pr merge --match-head-commit`) |
 | Local merge (`local-only` mode) | Fast-forward only onto local `main` | `fm-merge-local.sh` |
-| My approval | I approve every merge, except on the 2 projects where I turned on auto-merge for green, in-scope work | Firstmate asks; a red PR is never merged, even with auto-merge on, unless I waive a named check |
-| Teardown | Worktree clean and its work landed | `fm-teardown.sh` refuses otherwise |
+| My approval | I approve every merge, except on the 2 projects where I turned on auto-merge for green, in-scope work | Process rule: Firstmate asks me. The red-PR refusal is in `fm-pr-merge.sh` and holds even with auto-merge on, unless I waive a named check |
+| Teardown | Worktree clean and its work landed | Script: `fm-teardown.sh` refuses otherwise, unless explicitly forced |
 
-How I set the delivery modes across 41 registered projects: 29 run the full pipeline for product code and a lighter direct PR for internal tooling (`no-mistakes-prod-only`), 10 are `local-only` (personal repos and experiments, including this one), and 2 always run the full pipeline.
+How I set the delivery modes across my registered projects: most run the full pipeline for product code and a lighter direct PR for internal tooling (`no-mistakes-prod-only`). Personal repos and experiments are `local-only`, where the worker hands back a ready branch instead of opening a PR. Two always run the full pipeline. Current counts are in [NUMBERS.md](NUMBERS.md).
 
 ## What I changed locally
 
 Three kinds of change, all mine and none in upstream as of my last fetch:
 
-- **43 commits to Firstmate's own scripts and tests.** 33 fixes, 8 test changes, 1 feature, 1 chore, between 28 Sep and 22 Oct 2026. Almost all came out of a failure in [FAILURES.md](FAILURES.md).
+- **43 commits to Firstmate's own scripts and tests.** 33 fixes, 8 test changes, 1 feature, 1 chore, between 28 Sep and 22 Oct 2026. Most came out of a failure in [FAILURES.md](FAILURES.md).
 - **The review loop above**, as a skill outside the Firstmate repo.
 - **Standing rules added to every brief.** For example: prove it by running the real thing; check that a test suite actually ran something before trusting a green result; run the repo's whole lint gate, not just the tool you touched. Each rule is there because breaking it cost me real time.
 

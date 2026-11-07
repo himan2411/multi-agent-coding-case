@@ -8,10 +8,13 @@ home=${1:?usage: counts.sh <firstmate-home> [upstream-ref]}
 upstream=${2:-origin/main}
 data="$home/data"
 [ -d "$data" ] || { echo "no data/ under $home" >&2; exit 1; }
+git -C "$home" rev-parse -q --verify "$upstream^{commit}" >/dev/null ||
+  { echo "no $upstream in $home; pass an upstream ref" >&2; exit 1; }
 
 echo "== Local commits on top of $upstream"
 git -C "$home" log --format='%s' "$upstream..HEAD" | wc -l | awk '{print "commits:", $1}'
-git -C "$home" log --format='%ad' --date=short "$upstream..HEAD" | sort | sed -n '1s/^/first: /p;$s/^/last: /p'
+dates=$(git -C "$home" log --format='%ad' --date=short "$upstream..HEAD" | sort)
+[ -z "$dates" ] || printf 'first: %s\nlast: %s\n' "$(head -1 <<<"$dates")" "$(tail -1 <<<"$dates")"
 git -C "$home" log --format='%s' "$upstream..HEAD" | sed -E 's/[(:].*//' | sort | uniq -c | awk '{print "type", $2":", $1}'
 
 # One directory per task under data/ or data/archive/.
@@ -33,12 +36,15 @@ echo "Firstmate's own changes:"
 printf '%s\n' "$rounds" | awk '$2 ~ /^fm-/ {print "  " $2 ": " $1}'
 
 echo "== Backlog records (unique task ids by kind)"
-{ cat "$data"/backlog*.md "$data"/done-archive.md 2>/dev/null || true; } |
-  grep -E '^- \[.\] ' |
-  sed -nE 's/^- \[.\] ([^ ]+) .*\(kind: ([a-z]+)\).*/\2 \1/p' |
-  sort -u | awk '{print $1}' | sed 's/^captain$/decision-hold/' | sort | uniq -c | awk '{print "kind " $2 ": " $1}'
+entries=$(grep -hE '^- \[.\] ' "$data"/backlog*.md "$data"/done-archive.md 2>/dev/null || true)
+kinded=$(sed -nE 's/^- \[.\] ([^ ]+) .*\(kind: ([a-z]+)\).*/\2 \1/p' <<<"$entries" | sort -u)
+awk 'NF {print $1}' <<<"$kinded" | sed 's/^captain$/decision-hold/' | sort | uniq -c | awk '{print "kind " $2 ": " $1}'
+# Ids that never carry a kind on any line.
+echo "ids with no kind: $(sed -nE 's/^- \[.\] ([^ ]+) .*/\1/p' <<<"$entries" | sort -u |
+  comm -23 - <(awk 'NF {print $2}' <<<"$kinded" | sort -u) | grep -c . || true)"
 
 echo "== Registered projects by delivery mode"
+echo "projects: $({ grep -E '^- [^ ]+ \[' "$data/projects.md" 2>/dev/null || true; } | grep -c . || true)"
 { grep -E '^- [^ ]+ \[' "$data/projects.md" 2>/dev/null || true; } |
   sed -E 's/^- [^ ]+ \[([a-zA-Z-]+).*/\1/' | sort | uniq -c | awk '{print "mode " $2 ": " $1}'
 echo "auto-merge (+yolo): $({ grep -E '^- [^ ]+ \[[^]]*\+yolo' "$data/projects.md" 2>/dev/null || true; } | wc -l | tr -d ' ')"

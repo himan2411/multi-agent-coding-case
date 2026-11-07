@@ -5,7 +5,7 @@ What broke while I ran this setup, why, and what changed afterwards. Dates are 2
 | # | When | Failure | What changed |
 |---|---|---|---|
 | 1 | Aug to Oct | The supervisor spent most of its turns on noise | Watcher stays silent for working and paused workers; three rounds of fixes |
-| 2 | Oct | An author's own tests passed on changes that still had blockers | Independent review loop with a fresh reviewer per round |
+| 2 | Oct | An author's own tests passed on changes that still had blockers | Firstmate's own changes go through the independent review loop too |
 | 3 | 20 Oct | The tmux server died three times and took live workers with it | Test cleanup only signals processes it can prove it started; risky suites banned on this host |
 | 4 | 11 Oct | Workers ran under the wrong Claude account | Every launch pins or clears the account and drops the parent session's identity |
 | 5 | 22 Oct | Worker tabs never closed, and a slow terminal app made duplicates | Close is forced and recorded; a timed-out open adopts the tab it created |
@@ -15,7 +15,7 @@ What broke while I ran this setup, why, and what changed afterwards. Dates are 2
 | 9 | 28 Sep | Bash crashed in subshells on a machine with no `LANG` | A locale guard is sourced wherever scripts reset the locale |
 | 10 | 11 Oct | A worker in a project with no remote started from stale history | Spawn resolves the local default branch for remote-less projects |
 | 11 | Sep to Oct | Workers said "done" when delivery had not happened, and test suites passed while running nothing | Delivery is checked against the real head and checks; briefs require proof the suite ran |
-| 12 | Sep | A change passed eight review rounds and still failed every real run | Any new join needs a measured key-overlap count as evidence |
+| 12 | Sep | A change passed eight review rounds but would have failed every real run | Any new join needs a measured key-overlap count as evidence |
 
 ## 1. The supervisor drowned in wakes
 
@@ -36,7 +36,7 @@ What broke while I ran this setup, why, and what changed afterwards. Dates are 2
 
 **Cause.** An author checks the cases it thought of. Its tests encode the same assumptions as its code.
 
-**What changed.** Every change now goes through the review loop in [CASE.md](CASE.md#the-review-loop). The reviewer gets only the task text and the commit, a new reviewer runs each round, and each finding comes with a repro or a test that fails today. Over all work so far: 38 changes, 70 reviewer workers, 14 changes needing more than one round, 2 needing five.
+**What changed.** I had started running the review loop in [CASE.md](CASE.md#the-review-loop) on client work a day earlier, on 6 Oct. This watcher change was one of the first changes to Firstmate itself to go through it, and from then on all of them did. The reviewer gets only the task text and the commit, a new reviewer runs each round, and each finding comes with a repro or a test that fails today. Round counts are in [NUMBERS.md](NUMBERS.md).
 
 ## 3. tmux died and took live workers with it
 
@@ -101,7 +101,7 @@ What broke while I ran this setup, why, and what changed afterwards. Dates are 2
 
 ## 10. Stale base in projects with no remote
 
-**What happened.** Several of my repos, this one included, live only on my machine. Workers in them could start from whatever commit their pooled worktree happened to hold.
+**What happened.** Several of my repos live only on my machine. Workers in them could start from whatever commit their pooled worktree happened to hold.
 
 **What changed.** `918ea942`, `84b39082`: the spawn finds the local default branch, even when it is not called `main` or `master`, and starts the worker from it.
 
@@ -117,7 +117,7 @@ What broke while I ran this setup, why, and what changed afterwards. Dates are 2
 
 ## 12. Review cannot see a data defect
 
-**What happened.** In early September, a change to a client data pipeline passed its final review with zero findings after eight review rounds. It still failed on every real run. It joined two tables on a key where 0 of 1,592,906 values on one side existed on the other, because the pipeline has two separate key spaces that happen to share a column name.
+**What happened.** In early September, before I had the independent review loop, a change to a client data pipeline passed its final PR review with zero findings after eight rounds. It would still have failed on every real run. It joined two tables on a key where a direct query showed none of about 1.6 million values on one side existed on the other, because the pipeline has two separate key spaces that happen to share a column name. Two days later an upstream rewrite replaced the measured table, and the change was rebased and re-verified against the new one.
 
 **Cause.** Reviewers read code and ran tests on fixtures. Nobody measured the join against real data. A direct query found it in seconds.
 
