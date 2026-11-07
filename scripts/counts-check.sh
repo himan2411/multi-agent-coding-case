@@ -21,7 +21,8 @@ commit 2026-04-01 "test: three"
 
 d="$home/data"
 mkdir -p "$d/archive/task-a" "$d/archive/old-task" "$d/no-brief"
-for id in task-a task-a-review task-a-review-2 task-b task-b-r2 task-b-r2x fm-x-review-1 pr-9-review; do
+for id in task-a task-a-review task-a-review-2 task-b task-b-r2 task-b-r2x fm-x-review-1 pr-9-review \
+  task-z task-z-review task-z-review-r2 task-z-review-r3 fm-y-review; do
   mkdir -p "$d/$id"; touch "$d/$id/brief.md"
 done
 touch "$d/archive/old-task/brief.md" "$d/archive/task-a/brief.md"
@@ -32,11 +33,11 @@ printf -- '- p1 [local-only] - a\n- p2 [no-mistakes +yolo] - b\n- p3 [local-only
 
 out=$("$here/counts.sh" "$home" upstream)
 expect "commits: 3" "first: 2026-02-01" "last: 2026-04-01" "type fix: 2" "type test: 1" \
-  "task directories: 10" "with a worker brief: 9" "successor workers (-rN): 1" \
-  "changes reviewed: 2" "reviewer workers: 3" "1 change(s) took 1 round(s)" "1 change(s) took 2 round(s)" "fm-x: 1" \
+  "task directories: 15" "with a worker brief: 14" "successor workers (-rN): 1" \
+  "changes with 2+ rounds: 2" "reviewer workers in them: 5" "1 change(s) took 2 rounds" "1 change(s) took 3 rounds" "fm-x: 1" \
   "kind decision-hold: 1" "kind ship: 2" "kind scout: 2" "ids with no kind: 1" \
   "projects: 3" "mode local-only: 2" "mode no-mistakes: 1" "auto-merge (+yolo): 1"
-reject "task-a" "task-b" "task-c" "task-d" "task-e" "ask-1" "pr-9" "kind captain"
+reject "task-a" "task-b" "task-c" "task-d" "task-e" "task-z" "ask-1" "pr-9" "fm-y" "kind captain" "took 1 round"
 
 # One local commit: first and last are the same plain date.
 out=$("$here/counts.sh" "$home" HEAD~1)

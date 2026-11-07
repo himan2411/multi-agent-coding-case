@@ -1,6 +1,6 @@
 # How the setup works
 
-This is how I run coding agents in parallel on one Mac. The orchestrator is [Firstmate](https://github.com/kunchenguid/firstmate), an open-source project by Kun Chen. I did not write it. I run it every day, I set the policies on top of it, and I fixed what broke for me in 43 local commits (see [NUMBERS.md](NUMBERS.md)).
+This is how I run coding agents in parallel on one Mac. The orchestrator is [Firstmate](https://github.com/kunchenguid/firstmate), an open-source project by Kun Chen. I did not write it. I run it every day, I set the policies on top of it, and I fixed what broke for me in my own local commits (see [NUMBERS.md](NUMBERS.md)).
 
 The work it runs is mostly client data-science projects, plus Firstmate itself and my own side projects.
 
@@ -92,7 +92,7 @@ The rules, and why each exists:
 - **The reviewer runs the code.** It runs the tests, breaks each new test on purpose to prove it can fail (a mutation check), and sweeps every sibling of any flaw it finds. "Looks good" without a list of what it ran does not end the loop.
 - **Review happens before any human or bot reviewer sees the PR**, because each extra round there costs a person's time.
 
-How many changes went through this loop, and how many rounds each took, is in [NUMBERS.md](NUMBERS.md).
+How many changes needed more than one round, and how many rounds they took, is in [NUMBERS.md](NUMBERS.md).
 
 ## The gates
 
@@ -116,7 +116,7 @@ How I set the delivery modes across my registered projects: most run the full pi
 
 Three kinds of change, all mine and none in upstream as of my last fetch:
 
-- **43 commits to Firstmate's own scripts and tests**, between 28 Sep and 22 Oct 2026. The breakdown is in [NUMBERS.md](NUMBERS.md). Most came out of a failure in [FAILURES.md](FAILURES.md).
+- **Local commits to Firstmate's own scripts and tests.** The count, dates and breakdown are in [NUMBERS.md](NUMBERS.md). Most came out of a failure in [FAILURES.md](FAILURES.md).
 - **The review loop above**, as a skill outside the Firstmate repo.
 - **Standing rules added to every brief.** For example: prove it by running the real thing; check that a test suite actually ran something before trusting a green result; run the repo's whole lint gate, not just the tool you touched. Each rule is there because breaking it cost me real time.
 

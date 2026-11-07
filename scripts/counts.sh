@@ -25,18 +25,22 @@ briefed=$(find "${roots[@]}" -mindepth 2 -maxdepth 2 -name brief.md | awk -F/ '{
 echo "== Tasks"
 echo "task directories: $(printf '%s\n' "$ids" | grep -c .)"
 echo "with a worker brief: $(printf '%s\n' "$briefed" | grep -c .)"
-echo "successor workers (-rN): $(printf '%s\n' "$ids" | grep -cE -- '-r[0-9]+$' || true)"
+# A <task>-review-rN folder is a review round, not a successor.
+echo "successor workers (-rN): $(grep -E -- '-r[0-9]+$' <<<"$ids" | grep -vcE -- '-review-r[0-9]+$' || true)"
 
-echo "== Independent review rounds (<task>-review-N)"
-# Round 1 is often an unnumbered <task>-review folder. Count it only when the
-# same task also has numbered rounds; an unnumbered folder on its own is
-# usually a one-off review of a PR, not this loop.
-numbered=$(grep -E -- '-review-[0-9]+$' <<<"$ids" | sed -E 's/-review-[0-9]+$//' || true)
+echo "== Independent review rounds"
+# Rounds are named <task>-review-<n> or <task>-review-r<n>, and round 1 is
+# often an unnumbered <task>-review, counted only beside numbered rounds.
+# A lone unnumbered folder may be a clean first-round pass or a one-off review
+# of someone else's PR; names cannot tell them apart, so only changes with
+# 2 or more rounds are reported.
+numbered=$(grep -E -- '-review-r?[0-9]+$' <<<"$ids" | sed -E 's/-review-r?[0-9]+$//' || true)
 first=$(grep -E -- '-review$' <<<"$ids" | sed -E 's/-review$//' | grep -Fx -f <(sort -u <<<"$numbered") || true)
 rounds=$(printf '%s\n%s\n' "$numbered" "$first" | grep . | sort | uniq -c || true)
-echo "changes reviewed: $(printf '%s\n' "$rounds" | grep -c . || true)"
-echo "reviewer workers: $(printf '%s\n' "$rounds" | awk '{s+=$1} END {print s+0}')"
-printf '%s\n' "$rounds" | awk 'NF {print $1}' | sort -n | uniq -c | awk '{print "  " $1 " change(s) took " $2 " round(s)"}'
+multi=$(awk '$1 >= 2' <<<"$rounds")
+echo "changes with 2+ rounds: $(grep -c . <<<"$multi" || true)"
+echo "reviewer workers in them: $(awk '{s+=$1} END {print s+0}' <<<"$multi")"
+awk 'NF {print $1}' <<<"$multi" | sort -n | uniq -c | awk '{print "  " $1 " change(s) took " $2 " rounds"}'
 echo "Firstmate's own changes:"
 printf '%s\n' "$rounds" | awk '$2 ~ /^fm-/ {print "  " $2 ": " $1}'
 
