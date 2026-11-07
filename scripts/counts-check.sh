@@ -21,27 +21,29 @@ commit 2026-04-01 "test: three"
 
 d="$home/data"
 mkdir -p "$d/archive/task-a" "$d/archive/old-task" "$d/no-brief"
-for id in task-a task-a-review-1 task-a-review-2 task-b task-b-r2 fm-x-review-1; do
+for id in task-a task-a-review task-a-review-2 task-b task-b-r2 task-b-r2x fm-x-review-1 pr-9-review; do
   mkdir -p "$d/$id"; touch "$d/$id/brief.md"
 done
 touch "$d/archive/old-task/brief.md" "$d/archive/task-a/brief.md"
 printf -- '- [x] task-a - a (kind: ship)\n- [ ] task-a - again\n- [ ] task-b - b (kind: scout)\n- [ ] task-b - dup (kind: scout)\n- [ ] ask-1 - q (kind: captain)\n- [ ] task-c - no kind\n' > "$d/backlog.md"
+printf -- '- [ ] task-d - d (kind: ship, mode=direct-PR)\n' > "$d/backlog-x.md"
+printf -- '- [x] task-e - e (kind: scout) (done 2026-01-01)\n' > "$d/done-archive.md"
 printf -- '- p1 [local-only] - a\n- p2 [no-mistakes +yolo] - b\n- p3 [local-only] - c\n' > "$d/projects.md"
 
 out=$("$here/counts.sh" "$home" upstream)
 expect "commits: 3" "first: 2026-02-01" "last: 2026-04-01" "type fix: 2" "type test: 1" \
-  "task directories: 8" "with a worker brief: 7" "successor workers (-rN): 1" \
+  "task directories: 10" "with a worker brief: 9" "successor workers (-rN): 1" \
   "changes reviewed: 2" "reviewer workers: 3" "1 change(s) took 1 round(s)" "1 change(s) took 2 round(s)" "fm-x: 1" \
-  "kind decision-hold: 1" "kind ship: 1" "kind scout: 1" "ids with no kind: 1" \
+  "kind decision-hold: 1" "kind ship: 2" "kind scout: 2" "ids with no kind: 1" \
   "projects: 3" "mode local-only: 2" "mode no-mistakes: 1" "auto-merge (+yolo): 1"
-reject "task-a" "task-b" "task-c" "ask-1" "kind captain"
+reject "task-a" "task-b" "task-c" "task-d" "task-e" "ask-1" "pr-9" "kind captain"
 
 # One local commit: first and last are the same plain date.
 out=$("$here/counts.sh" "$home" HEAD~1)
 expect "commits: 1" "first: 2026-04-01" "last: 2026-04-01"
 
 # No backlog files: the script still reaches the end.
-rm "$d/backlog.md"
+rm "$d"/backlog*.md "$d/done-archive.md"
 out=$("$here/counts.sh" "$home" upstream)
 expect "ids with no kind: 0" "projects: 3"
 

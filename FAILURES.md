@@ -36,7 +36,7 @@ What broke while I ran this setup, why, and what changed afterwards. Dates are 2
 
 **Cause.** An author checks the cases it thought of. Its tests encode the same assumptions as its code.
 
-**What changed.** I had started running the review loop in [CASE.md](CASE.md#the-review-loop) on client work a day earlier, on 6 Oct. This watcher change was one of the first changes to Firstmate itself to go through it, and from then on all of them did. The reviewer gets only the task text and the commit, a new reviewer runs each round, and each finding comes with a repro or a test that fails today. Round counts are in [NUMBERS.md](NUMBERS.md).
+**What changed.** I had started running the review loop in [CASE.md](CASE.md#the-review-loop) on client work two days earlier, on 5 Oct. This watcher change was the first change to Firstmate itself to go through it, and from then on all of them did. The reviewer gets only the task text and the commit, a new reviewer runs each round, and each finding comes with a repro or a test that fails today. Round counts are in [NUMBERS.md](NUMBERS.md).
 
 ## 3. tmux died and took live workers with it
 

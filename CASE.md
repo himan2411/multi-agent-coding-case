@@ -14,7 +14,6 @@ flowchart BT
     disk[("Files on disk<br/>status logs, inboxes,<br/>briefs, reports, backlog")]
 
     subgraph crew["tmux: one window per worker, each in its own git worktree"]
-        direction LR
         w1["Ship worker<br/>writes the change"]
         w2["Scout worker<br/>writes a report"]
         w3["Reviewer<br/>fresh each round"]
@@ -117,7 +116,7 @@ How I set the delivery modes across my registered projects: most run the full pi
 
 Three kinds of change, all mine and none in upstream as of my last fetch:
 
-- **43 commits to Firstmate's own scripts and tests.** 33 fixes, 8 test changes, 1 feature, 1 chore, between 28 Sep and 22 Oct 2026. Most came out of a failure in [FAILURES.md](FAILURES.md).
+- **43 commits to Firstmate's own scripts and tests**, between 28 Sep and 22 Oct 2026. The breakdown is in [NUMBERS.md](NUMBERS.md). Most came out of a failure in [FAILURES.md](FAILURES.md).
 - **The review loop above**, as a skill outside the Firstmate repo.
 - **Standing rules added to every brief.** For example: prove it by running the real thing; check that a test suite actually ran something before trusting a green result; run the repo's whole lint gate, not just the tool you touched. Each rule is there because breaking it cost me real time.
 
